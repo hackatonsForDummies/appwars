@@ -1,27 +1,52 @@
-import { useState } from 'react';
-import ButtonAdd from './components/ButtonAdd';
-import ButtonDec from './components/ButtonDec';
+import { useEffect, useState } from 'react';
+import filmsHook from './hooks/filmsHook';
 import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [films, setFilms] = useState([]);
+  const [getFilms] = filmsHook();
 
-  const handleDec = () => {
-    const newCount = count - 1;
+  useEffect(() => {
+    getFilms().then((res: any) => setFilms(res || []));
+  }, [getFilms])
 
-    if (newCount >= 0) {
-      setCount(newCount);
-    }
+  const convertDate = (date: string) => {
+    const newDate = new Date(date);
+    return newDate.getFullYear();
   }
+
+  const Row = ({ title, episode_id, release_date }: any) => {
+    return (
+      <tr>
+        <td>{title}</td>
+        <td>{episode_id}</td>
+        <td>{convertDate(release_date)}</td>
+      </tr>
+    )
+  }
+  
+  const List = () => {
+    return (
+      <table>
+        <tr>
+          <th>Titulo</th>
+          <th>Episodio</th>
+          <th>Año</th>
+        </tr>
+        {films.map((film: any) => <Row key={film.title} {...film} />)}
+      </table>
+    )
+  }
+
+  console.log('films', films)
 
   return (
     <div className="card">
-      Counter: {count}
-
-      <div>
-        <ButtonAdd handler={setCount} />
-        <ButtonDec handler={handleDec}/>
-      </div>
+      {
+        !films.length
+          ? <div>No hay películas cargadas todavía</div>
+          : <List />
+      }
     </div>
   )
 }
